@@ -1,17 +1,19 @@
 import { TelegramClient } from 'telegram';
 import { StringSession } from "telegram/sessions/index.js";
-import { NewMessage } from "telegram/events";
-
+import { NewMessage } from "telegram/events/index.js";
+import fs from "fs";
 import PromptSync from 'prompt-sync';
-const prompt = PromptSync();
 
+
+const prompt = PromptSync();
 const apiId = 27551667;
 const apiHash = "fb00dcbf80562d3444537f792e3762af";
 
 const stringSession = new StringSession("");
 
 let run = async () => {
-    let client = new TelegramClient(stringSession, apiId, apiHash, {
+    const sessionString = fs.readFileSync("session.txt", "utf-8") || new StringSession("");
+    let client = new TelegramClient(sessionString, apiId, apiHash, {
         connectionRetries: 5,
     });
     await startClient(client)
@@ -26,6 +28,7 @@ let startClient = async (client) => {
         onError: (err) => console.log(err),
     });
     const sessionString = client.session.save();
+    fs.writeFileSync("session.txt", client.session.save());
     console.log("Session saved:", sessionString);
 }
 
