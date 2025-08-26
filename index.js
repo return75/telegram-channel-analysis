@@ -9,11 +9,10 @@ const prompt = PromptSync();
 const apiId = 27551667;
 const apiHash = "fb00dcbf80562d3444537f792e3762af";
 
-const stringSession = new StringSession("");
-
 let run = async () => {
-    const sessionString = fs.readFileSync("session.txt", "utf-8") || new StringSession("");
-    let client = new TelegramClient(sessionString, apiId, apiHash, {
+    const sessionString = fs.readFileSync("session.txt", "utf-8")
+    const session = sessionString ? new StringSession(sessionString) : new StringSession("")
+    let client = new TelegramClient(session, apiId, apiHash, {
         connectionRetries: 5,
     });
     await startClient(client)
