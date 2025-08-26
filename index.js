@@ -16,7 +16,7 @@ let run = async () => {
         connectionRetries: 5,
     });
     await startClient(client)
-    listenToChats(client, ['@CloudHesoyam'])
+    listenToChats(client, ['@CloudHesoyam', '@soloAnalyze'])
 }
 
 let startClient = async (client) => {
@@ -27,15 +27,15 @@ let startClient = async (client) => {
         onError: (err) => console.log(err),
     });
     const sessionString = client.session.save();
-    fs.writeFileSync("session.txt", client.session.save());
-    console.log("Session saved:", sessionString);
+    fs.writeFileSync("session.txt", sessionString);
+    console.log("Session Started");
 }
 
 let listenToChats = (client, chats) => {
     client.addEventHandler(async (event) => {
         const message = event.message;
-        console.log("پیام جدید:", message.text);
-    }, new NewMessage({}));
+        console.log("new Message:", message.text);
+    }, new NewMessage({chats}));
 }
 
 run()
