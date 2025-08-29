@@ -5,6 +5,7 @@ import fs from "fs";
 import path from 'path';
 import AdmZip from 'adm-zip';
 import PromptSync from 'prompt-sync';
+import pkg from 'pg';
 
 
 const prompt = PromptSync();
@@ -145,8 +146,36 @@ const extractDataFromType2File = (fileContent) => {
     return records;
 }
 
-const insertRecordsInDataBase = (records) => {
-    console.log('records', records)
+const connectToDataBase = () => {
+    let { Pool } = pkg;
+    return new Pool({
+        user: 'postgres',
+        host: 'localhost',
+        database: 'telegram-channels',
+        password: '1234',
+        port: 2000,
+    });
+}
+
+const insertRecordsInDataBase = async (records) => {
+    const pool = connectToDataBase()
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        for (const record of records) {
+            await client.query(
+                'INSERT INTO urls_data(url, username, password) VALUES($1, $2, $3)',
+                [record.url, record.username, record.password]
+            );
+        }
+        await client.query('COMMIT');
+        console.log('all records inserted successfully');
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error('❌ خطا در درج رکوردها:', err);
+    } finally {
+        client.release();
+    }
 }
 
 const analyzeZipFile = () => {
@@ -163,6 +192,8 @@ const analyzeZipFile = () => {
         }
     });
 }
+
+
 
 
 //run()
